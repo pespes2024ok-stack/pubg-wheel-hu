@@ -1,0 +1,167 @@
+{
+  "app_name": "HEEBA / هيبة",
+  "personality": "7 Dark-First Utility with 6 Glass / Luxe fusion",
+  "personality_one_liner": "A dark, premium, military-tactical gaming lobby built on obsidian glass, illuminated by fiery orange accents and metallic details.",
+  "color": {
+    "surface": "#0F1115",
+    "onSurface": "#FFFFFF",
+    "surfaceSecondary": "#191B21",
+    "onSurfaceSecondary": "#E0E0E0",
+    "surfaceTertiary": "#22252C",
+    "onSurfaceTertiary": "#B0B4BA",
+    "surfaceInverse": "#FFFFFF",
+    "onSurfaceInverse": "#0F1115",
+    "brand": "#FF5722",
+    "brandPrimary": "#FF5722",
+    "onBrandPrimary": "#FFFFFF",
+    "brandSecondary": "#FFC107",
+    "onBrandSecondary": "#191B21",
+    "brandTertiary": "#4B5320",
+    "onBrandTertiary": "#FFFFFF",
+    "success": "#4CAF50",
+    "onSuccess": "#FFFFFF",
+    "warning": "#FF9800",
+    "onWarning": "#FFFFFF",
+    "error": "#F44336",
+    "onError": "#FFFFFF",
+    "info": "#607D8B",
+    "onInfo": "#FFFFFF",
+    "border": "#2A2D35",
+    "borderStrong": "#40444F",
+    "divider": "#1E2028",
+    "muted": "#757A85",
+    "onBrand": "#FFFFFF",
+    "rarityCommon": "#9E9E9E",
+    "rarityRare": "#4CAF50",
+    "rarityEpic": "#FF5722",
+    "rarityLegendary": "#FFD700"
+  },
+  "typography": {
+    "displayFontFamily": "Rajdhani",
+    "textFontFamily": "Cairo",
+    "scale": {
+      "sm": 12,
+      "base": 14,
+      "lg": 16,
+      "xl": 20,
+      "2xl": 24
+    }
+  },
+  "spacing": {
+    "rule": "Generous spacing around layout boundaries to avoid cramping. Since the app is Arabic-first, use RTL formatting where horizontal spaces apply (start/end margins instead of left/right).",
+    "xs": 4,
+    "sm": 8,
+    "md": 12,
+    "lg": 16,
+    "xl": 24,
+    "2xl": 32,
+    "3xl": 48
+  },
+  "radius_tokens": {
+    "sm": 4,
+    "md": 8,
+    "lg": 16,
+    "pill": 999
+  },
+  "shadow_tier": 2,
+  "navigation": "bottom_tabs",
+  "icon_set": "MaterialCommunityIcons",
+  "glassmorphism": {
+    "enabled": true,
+    "do's": [
+      "Use heavy glass with a dark translucent base for the bottom tab bar and sticky headers to resemble a tactical HUD.",
+      "Layer cards in the Store and Profile using soft blur over the dark cinematic background."
+    ],
+    "dont's": [
+      "Don't overuse glass on form inputs or dense data cells.",
+      "Don't reduce opacity to the point where text becomes illegible against background graphics."
+    ]
+  },
+  "platform_libraries": {
+    "glass": {
+      "ios": "expo-glass-effect",
+      "android": "expo-blur",
+      "low_end_android_fallback": "solid surfaceSecondary"
+    },
+    "image": "expo-image",
+    "blur": "expo-blur",
+    "bottom_sheet": "@gorhom/bottom-sheet",
+    "animation": "react-native-reanimated",
+    "gesture": "react-native-gesture-handler"
+  },
+  "screens": [
+    {
+      "name": "Home Lobby",
+      "purpose": "A cinematic dashboard that immerses the user in the game, focusing heavily on the interactive daily Lucky Wheel, notifications, and shortcuts to rewards.",
+      "states": {
+        "loading": "Centered glowing game-style loader.",
+        "empty": "N/A - the lobby always has content.",
+        "error": "Error prompt with 'Retry' mimicking a game connection error."
+      },
+      "layout": "RTL-first. Use a full-bleed dark abstract metallic/fire background behind the content. Top header glass with User Avatar and Points Balance. Center the interactive 3D Lucky Wheel (prominent circle with glow, haptic tick on spin, and rarity colors). Below the wheel, a multi-column grid of frosted glass cards for 'Rewards', 'Store', 'Content Creators', and 'Referrals'. 'SPIN NOW' CTA pinned and glowing."
+    },
+    {
+      "name": "Store (HEEBA Rewards)",
+      "purpose": "A premium tactical catalog where users redeem points for PUBG-related items like UC, skins, and crates.",
+      "states": {
+        "loading": "Skeleton grids of items fading in and out.",
+        "empty": "Tactical supply crate illustration stating 'Store is being restocked.'",
+        "error": "Failed to load catalog message with reload button."
+      },
+      "layout": "Grid layout (2-column). Each product card has an image slot with a gradient scrim, a rarity border/badge (Legendary, Epic, etc.), item title, and cost in points. Top filter tabs (UC, Skins, Crates) floating as pills below the header."
+    },
+    {
+      "name": "My Rewards",
+      "purpose": "An inventory screen tracking user wins and purchased rewards, displaying their order status.",
+      "states": {
+        "loading": "Skeleton rows.",
+        "empty": "Empty inventory icon with 'You have no rewards yet. Spin the wheel!' CTA.",
+        "error": "Standard error overlay."
+      },
+      "layout": "List-based layout (single column). Each row should display the reward image, name, status (Pending/Delivered), order number, and a rarity glow. Glassmorphic tabs at the top for 'Won' and 'Purchased'."
+    },
+    {
+      "name": "Player Profile",
+      "purpose": "A command-center view of the user's achievements, balances, and referrals.",
+      "states": {
+        "loading": "Skeleton profile layout.",
+        "empty": "N/A - Data always present.",
+        "error": "Unable to fetch profile data prompt."
+      },
+      "layout": "Large hero banner using a military camouflage texture. Overlaid profile avatar. Key metrics (Points Balance, Referrals, Rewards Count) displayed in large condensed numbers (Rajdhani) using a 3-column stats panel. Below, a list of 'Points History' showing recent transactions."
+    }
+  ],
+  "images": {
+    "hero_background": {
+      "url": "https://images.unsplash.com/photo-1710438399422-2fca27686bcd?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NjA0MTJ8MHwxfHNlYXJjaHwxfHxkYXJrJTIwYWJzdHJhY3QlMjBtZXRhbGxpYyUyMHRleHR1cmV8ZW58MHx8fHwxNzg4OTc3OTQxfDA&ixlib=rb-4.1.0&q=85",
+      "alt": "Dark abstract metallic waves"
+    },
+    "fire_sparks_accent": {
+      "url": "https://images.unsplash.com/photo-1557951959-e3e30ee937e5?crop=entropy&cs=srgb&fm=jpg&ixid=M3w3NTY2NzZ8MHwxfHNlYXJjaHwxfHxvcmFuZ2UlMjBmaXJlJTIwc3BhcmtzfGVufDB8fHx8MTc4ODk3Nzk0MXww&ixlib=rb-4.1.0&q=85",
+      "alt": "Bright orange embers rising into the dark night air"
+    },
+    "coins_currency": {
+      "url": "https://images.unsplash.com/photo-1624365168012-7ed139887755?crop=entropy&cs=srgb&fm=jpg&ixid=M3w8NTYxOTF8MHwxfHNlYXJjaHw0fHxnb2xkJTIwY29pbnMlMjBzaGlueXxlbnwwfHx8fDE3ODg5Nzc5NDF8MA&ixlib=rb-4.1.0&q=85",
+      "alt": "Silver and gold round coins"
+    },
+    "profile_camo_banner": {
+      "url": "https://images.unsplash.com/photo-1612306299440-15460d4009e4?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NTYxODh8MHwxfHNlYXJjaHwxfHxtaWxpdGFyeSUyMGNhbW91ZmxhZ2UlMjB0ZXh0dXJlfGVufDB8fHx8MTc4ODk3Nzk0MXww&ixlib=rb-4.1.0&q=85",
+      "alt": "Military camouflage pattern"
+    }
+  },
+  "haptics": {
+    "wheel_spin_tick": "light",
+    "wheel_win_rare": "success",
+    "wheel_win_legendary": "heavy",
+    "button_press": "light",
+    "tab_change": "selection"
+  },
+  "instructions_to_main_agent": [
+    "Strictly enforce RTL layout natively, making sure all flex rows and icons reflect Arabic orientation.",
+    "Implement the Lucky Wheel with `react-native-reanimated` using physics-based easing. Integrate haptic feedback ticking as the wheel spins.",
+    "Utilize custom hex codes for rarity tiers defined in the JSON (Common, Rare, Epic, Legendary). Do NOT use generic blue for Rare; use the custom colors specified to abide by the nuclear ban on blue/purple.",
+    "Ensure `surface` (#0F1115) and `surfaceSecondary` (#191B21) dominate the UI with tactical glass overlays. Prevent pure black usage entirely.",
+    "Use Rajdhani for all numeric data (Points, UC amounts, Orders) and Cairo for Arabic text. Make sure weights do not exceed 500.",
+    "Any text overlaid on images must have a 3-stop vertical gradient scrim to ensure WCAG AA contrast."
+  ]
+}
