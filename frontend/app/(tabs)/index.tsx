@@ -39,6 +39,7 @@ export default function Home() {
   const prizesQ = useQuery({ queryKey: ["wheel-prizes"], queryFn: () => api.get("/wheel/prizes") });
   const statusQ = useQuery({ queryKey: ["wheel-status"], queryFn: () => api.get("/wheel/status"), enabled: !!user });
   const notifQ = useQuery({ queryKey: ["notifications"], queryFn: () => api.get("/notifications"), enabled: !!user });
+  const subsQ = useQuery({ queryKey: ["subscriptions"], queryFn: () => api.get("/subscriptions"), enabled: !!user });
 
   const canSpin = statusQ.data?.can_spin;
   const unread = (notifQ.data || []).filter((n: any) => !n.read).length;
@@ -68,6 +69,10 @@ export default function Home() {
 
   const onSpin = async () => {
     if (spinning) return;
+    if (subsQ.data && !subsQ.data.all_done) {
+      router.push("/subscribe-gate");
+      return;
+    }
     setSpinning(true);
     try {
       const res = await api.post("/wheel/spin");
@@ -84,7 +89,9 @@ export default function Home() {
       }, 4700);
     } catch (e: any) {
       setSpinning(false);
-      if (e?.detail?.code === "cooldown") {
+      if (e?.status === 403 && e?.detail?.code === "subscription_required") {
+        router.push("/subscribe-gate");
+      } else if (e?.detail?.code === "cooldown") {
         toast.show("لقد استخدمت دورتك اليوم، عد غداً!", "info");
         statusQ.refetch();
       } else {

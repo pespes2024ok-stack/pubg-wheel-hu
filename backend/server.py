@@ -189,6 +189,19 @@ class BackgroundBody(BaseModel):
     order: int = 0
 
 
+class ChannelBody(BaseModel):
+    title: str
+    url: str = ""
+    platform: str = "YouTube"
+    image: str = ""
+    active: bool = True
+    order: int = 0
+
+
+class ConfirmSub(BaseModel):
+    channel_id: str
+
+
 class NotificationBody(BaseModel):
     title: str
     message: str
@@ -425,6 +438,14 @@ async def wheel_status(user: dict = Depends(get_current_user)):
 
 @api.post("/wheel/spin")
 async def wheel_spin(user: dict = Depends(get_current_user)):
+    # Mandatory subscription gate
+    channels = await db.channels.find({"active": True, "deleted_at": None}, {"_id": 0}).to_list(100)
+    if channels:
+        done = set(user.get("subscribed_channels", []))
+        missing = [c["id"] for c in channels if c["id"] not in done]
+        if missing:
+            raise HTTPException(status_code=403, detail={"code": "subscription_required"})
+
     settings = await get_settings_doc()
     cooldown = settings.get("spin_cooldown_hours", 24)
     last = user.get("last_spin_at")
@@ -591,6 +612,25 @@ async def get_creators():
 
 
 # ---------------------------------------------------------------------------
+# Subscription gate (mandatory subscribe-to-spin channels)
+# ---------------------------------------------------------------------------
+@api.get("/subscriptions")
+async def get_subscriptions(user: dict = Depends(get_current_user)):
+    channels = await db.channels.find({"active": True, "deleted_at": None}, {"_id": 0}).sort([("order", 1), ("id", 1)]).to_list(100)
+    done = set(user.get("subscribed_channels", []))
+    for c in channels:
+        c["subscribed"] = c["id"] in done
+    all_done = all(c["subscribed"] for c in channels) if channels else True
+    return {"channels": channels, "all_done": all_done}
+
+
+@api.post("/subscriptions/confirm")
+async def confirm_subscription(body: ConfirmSub, user: dict = Depends(get_current_user)):
+    await db.users.update_one({"user_id": user["user_id"]}, {"$addToSet": {"subscribed_channels": body.channel_id}})
+    return {"ok": True}
+
+
+# ---------------------------------------------------------------------------
 # Backgrounds (public read)
 # ---------------------------------------------------------------------------
 @api.get("/backgrounds")
@@ -681,7 +721,21 @@ async def admin_stats(admin: dict = Depends(get_current_admin)):
     products = await db.products.count_documents({"deleted_at": None})
     rewards = await db.rewards.count_documents({"deleted_at": None})
     pending = await db.rewards.count_documents({"deleted_at": None, "status": "pending"})
-    return {"users": users, "prizes": prizes, "products": products, "rewards": rewards, "pending_rewards": pending}
+    dagg = await db.transactions.aggregate([
+        {"$match": {"amount": {"$gt": 0}}},
+        {"$group": {"_id": None, "total": {"$sum": "$amount"}}},
+    ]).to_list(1)
+    points_distributed = dagg[0]["total"] if dagg else 0
+    uagg = await db.users.aggregate([
+        {"$match": {"deleted_at": None}},
+        {"$group": {"_id": None, "total": {"$sum": "$points"}}},
+    ]).to_list(1)
+    total_user_points = uagg[0]["total"] if uagg else 0
+    return {
+        "users": users, "prizes": prizes, "products": products, "rewards": rewards,
+        "pending_rewards": pending, "points_distributed": points_distributed,
+        "total_user_points": total_user_points,
+    }
 
 
 # ----- Admin: Prizes -----
@@ -810,6 +864,34 @@ async def admin_update_background(bg_id: str, body: BackgroundBody, admin: dict 
 @api.delete("/admin/backgrounds/{bg_id}")
 async def admin_delete_background(bg_id: str, admin: dict = Depends(get_current_admin)):
     await db.backgrounds.update_one({"id": bg_id}, {"$set": {"deleted_at": now_utc()}})
+    return {"ok": True}
+
+
+# ----- Admin: Subscription channels -----
+@api.get("/admin/channels")
+async def admin_list_channels(admin: dict = Depends(get_current_admin)):
+    return await db.channels.find({"deleted_at": None}, {"_id": 0}).sort([("order", 1), ("id", 1)]).to_list(100)
+
+
+@api.post("/admin/channels")
+async def admin_create_channel(body: ChannelBody, admin: dict = Depends(get_current_admin)):
+    doc = body.model_dump()
+    doc["id"] = new_id("ch_")
+    doc["deleted_at"] = None
+    doc["created_at"] = now_utc()
+    await db.channels.insert_one(doc)
+    return clean(doc)
+
+
+@api.put("/admin/channels/{ch_id}")
+async def admin_update_channel(ch_id: str, body: ChannelBody, admin: dict = Depends(get_current_admin)):
+    await db.channels.update_one({"id": ch_id}, {"$set": body.model_dump()})
+    return await db.channels.find_one({"id": ch_id}, {"_id": 0})
+
+
+@api.delete("/admin/channels/{ch_id}")
+async def admin_delete_channel(ch_id: str, admin: dict = Depends(get_current_admin)):
+    await db.channels.update_one({"id": ch_id}, {"$set": {"deleted_at": now_utc()}})
     return {"ok": True}
 
 

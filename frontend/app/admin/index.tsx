@@ -14,6 +14,7 @@ const CARDS = [
   { route: "/admin/orders", icon: "package-variant-closed", title: "الطلبات والجوائز", desc: "تابع وحدّث حالة جوائز المستخدمين", color: "#4CAF50" },
   { route: "/admin/notifications", icon: "bell-ring", title: "الإشعارات", desc: "أرسل إشعارات لجميع المستخدمين", color: "#607D8B" },
   { route: "/admin/creators", icon: "video-vintage", title: "صناع المحتوى", desc: "أضف قنوات وروابط صناع المحتوى", color: "#9C27B0" },
+  { route: "/admin/channels", icon: "lock-open-check", title: "اشتراك العجلة الإجباري", desc: "روابط يجب على المستخدم الاشتراك بها قبل التدوير", color: "#E91E63" },
   { route: "/admin/backgrounds", icon: "image-multiple", title: "خلفيات التطبيق", desc: "أضف وغيّر واحذف خلفيات الشاشات", color: "#FF5722" },
   { route: "/admin/users", icon: "account-group", title: "المستخدمون", desc: "استعرض المستخدمين وعدّل نقاطهم", color: "#00BCD4" },
   { route: "/admin/settings", icon: "cog", title: "الإعدادات", desc: "اسم التطبيق، الشريط السفلي، الخلفيات، كلمة المرور", color: "#FF9800" },
@@ -51,6 +52,10 @@ export default function AdminDashboard() {
           <StatBox value={s.users ?? 0} label="مستخدم" icon="account" />
           <StatBox value={s.rewards ?? 0} label="جائزة" icon="trophy" />
           <StatBox value={s.pending_rewards ?? 0} label="قيد التسليم" icon="clock" highlight />
+        </View>
+        <View style={styles.statsRow}>
+          <StatBox value={s.points_distributed ?? 0} label="نقاط موزّعة" icon="hexagon-multiple" />
+          <StatBox value={s.total_user_points ?? 0} label="رصيد المستخدمين" icon="wallet" />
         </View>
 
         {/* Management cards */}

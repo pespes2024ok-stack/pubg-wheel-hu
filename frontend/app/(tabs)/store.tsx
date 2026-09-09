@@ -188,7 +188,7 @@ const useStyles = makeStyles((colors) => ({
   chipText: { color: colors.onSurfaceTertiary, fontSize: 13, fontFamily: fonts.textSemiBold },
   chipTextActive: { color: colors.onBrandPrimary },
   card: { flex: 1, backgroundColor: colors.surfaceSecondary, borderRadius: 16, borderWidth: 1, overflow: "hidden", padding: 8 },
-  imgWrap: { height: 120, borderRadius: 12, overflow: "hidden", marginBottom: 8 },
+  imgWrap: { aspectRatio: 1, borderRadius: 12, overflow: "hidden", marginBottom: 8 },
   img: { width: "100%", height: "100%" },
   imgScrim: { position: "absolute", left: 0, right: 0, bottom: 0, height: 50 },
   badgePos: { position: "absolute", top: 6, left: 6 },
