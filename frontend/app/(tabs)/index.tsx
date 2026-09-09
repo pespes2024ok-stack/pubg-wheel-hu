@@ -13,6 +13,7 @@ import { GameButton, Icon, Img, RarityBadge, Coin, Loader } from "@/src/componen
 import { Sparks } from "@/src/components/sparks";
 import { useBackgrounds, pickBackground } from "@/src/hooks";
 import { useToast } from "@/src/toast";
+import { useLoginGate } from "@/src/login-gate";
 import LuckyWheel, { WheelHandle } from "@/src/components/wheel";
 
 const { width } = Dimensions.get("window");
@@ -25,6 +26,7 @@ export default function Home() {
   const router = useRouter();
   const { user, refresh } = useAuth();
   const toast = useToast();
+  const { promptLogin } = useLoginGate();
   const qc = useQueryClient();
   const wheelRef = useRef<WheelHandle>(null);
   const [spinning, setSpinning] = useState(false);
@@ -35,8 +37,8 @@ export default function Home() {
   const bgs = useBackgrounds();
   const homeBg = pickBackground(bgs.data, "home", settings?.home_background);
   const prizesQ = useQuery({ queryKey: ["wheel-prizes"], queryFn: () => api.get("/wheel/prizes") });
-  const statusQ = useQuery({ queryKey: ["wheel-status"], queryFn: () => api.get("/wheel/status") });
-  const notifQ = useQuery({ queryKey: ["notifications"], queryFn: () => api.get("/notifications") });
+  const statusQ = useQuery({ queryKey: ["wheel-status"], queryFn: () => api.get("/wheel/status"), enabled: !!user });
+  const notifQ = useQuery({ queryKey: ["notifications"], queryFn: () => api.get("/notifications"), enabled: !!user });
 
   const canSpin = statusQ.data?.can_spin;
   const unread = (notifQ.data || []).filter((n: any) => !n.read).length;
@@ -105,18 +107,25 @@ export default function Home() {
           >
             {/* Header */}
             <View style={styles.header}>
-              <Pressable style={styles.userChip} onPress={() => router.push("/(tabs)/profile")}>
+              <Pressable style={styles.userChip} onPress={() => (user ? router.push("/(tabs)/profile") : promptLogin("سجّل الدخول لعرض ملفك"))}>
                 <Img uri={user?.picture} style={styles.avatar} fallbackIcon="account" />
                 <View>
-                  <Text style={styles.hi}>أهلاً بك</Text>
-                  <Text style={styles.name} numberOfLines={1}>{user?.name || "لاعب"}</Text>
+                  <Text style={styles.hi}>{user ? "أهلاً بك" : "وضع الزائر"}</Text>
+                  <Text style={styles.name} numberOfLines={1}>{user?.name || "زائر"}</Text>
                 </View>
               </Pressable>
               <View style={styles.headerRight}>
-                <View style={styles.pointsChip}>
-                  <Coin points={user?.points ?? 0} size={16} />
-                </View>
-                <Pressable style={styles.bell} onPress={() => router.push("/notifications")} testID="notifications-button">
+                {user ? (
+                  <View style={styles.pointsChip}>
+                    <Coin points={user?.points ?? 0} size={16} />
+                  </View>
+                ) : (
+                  <Pressable style={styles.loginPill} onPress={() => promptLogin("سجّل الدخول لتبدأ اللعب")} testID="header-login-pill">
+                    <Icon name="login" size={14} color={colors.onBrandPrimary} />
+                    <Text style={styles.loginPillText}>دخول</Text>
+                  </Pressable>
+                )}
+                <Pressable style={styles.bell} onPress={() => (user ? router.push("/notifications") : promptLogin("سجّل الدخول لعرض الإشعارات"))} testID="notifications-button">
                   <Icon name="bell" size={22} color={colors.onSurface} />
                   {unread > 0 ? <View style={styles.badge}><Text style={styles.badgeText}>{unread}</Text></View> : null}
                 </Pressable>
@@ -140,7 +149,9 @@ export default function Home() {
             </View>
 
             {/* Spin CTA */}
-            {canSpin ? (
+            {!user ? (
+              <GameButton title="أدر العجلة الآن" icon="ferris-wheel" onPress={() => promptLogin("سجّل الدخول لتدوير عجلة الحظ")} testID="spin-button" style={{ marginTop: 8 }} />
+            ) : canSpin ? (
               <GameButton title="أدر العجلة الآن" icon="ferris-wheel" onPress={onSpin} loading={spinning} testID="spin-button" style={{ marginTop: 8 }} />
             ) : (
               <View style={styles.cooldown} testID="cooldown-box">
@@ -239,6 +250,8 @@ const useStyles = makeStyles((colors) => ({
   name: { color: colors.onSurface, fontSize: 15, fontFamily: fonts.textBold, maxWidth: 120 },
   headerRight: { flexDirection: "row", alignItems: "center", gap: 10 },
   pointsChip: { backgroundColor: colors.surfaceSecondary, borderWidth: 1, borderColor: colors.border, borderRadius: 999, paddingHorizontal: 12, paddingVertical: 7 },
+  loginPill: { flexDirection: "row", alignItems: "center", gap: 5, backgroundColor: colors.brandPrimary, borderRadius: 999, paddingHorizontal: 14, paddingVertical: 8 },
+  loginPillText: { color: colors.onBrandPrimary, fontSize: 13, fontFamily: fonts.textBold },
   bell: { width: 42, height: 42, borderRadius: 21, backgroundColor: colors.surfaceSecondary, borderWidth: 1, borderColor: colors.border, alignItems: "center", justifyContent: "center" },
   badge: { position: "absolute", top: 4, right: 4, minWidth: 18, height: 18, borderRadius: 9, backgroundColor: colors.error, alignItems: "center", justifyContent: "center", paddingHorizontal: 4 },
   badgeText: { color: colors.onError, fontSize: 10, fontFamily: fonts.displayBold },

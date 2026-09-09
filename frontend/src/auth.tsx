@@ -6,6 +6,7 @@ import * as Linking from "expo-linking";
 import { api, setUserToken, USER_TOKEN_KEY } from "@/src/api";
 import { storage } from "@/src/utils/storage";
 import { registerForPush } from "@/src/push";
+import { GUEST_KEY } from "@/src/constants";
 
 WebBrowser.maybeCompleteAuthSession();
 
@@ -24,9 +25,12 @@ export type User = {
 type AuthCtx = {
   user: User | null;
   loading: boolean;
+  guest: boolean;
   signIn: () => Promise<void>;
   signOut: () => Promise<void>;
   refresh: () => Promise<void>;
+  continueAsGuest: () => Promise<void>;
+  exitGuest: () => Promise<void>;
 };
 
 const Ctx = createContext<AuthCtx>({} as AuthCtx);
@@ -37,6 +41,7 @@ const AUTH_BASE = "https://auth.emergentagent.com";
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
+  const [guest, setGuest] = useState(false);
   const processed = useRef<Set<string>>(new Set());
 
   const persistToken = useCallback(async (token: string) => {
@@ -66,6 +71,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       const res = await api.post("/auth/session", { session_id: sessionId });
       await persistToken(res.session_token);
       setUser(res.user);
+      setGuest(false);
+      storage.removeItem(GUEST_KEY);
       registerForPush(res.user.user_id);
     },
     [persistToken],
@@ -118,6 +125,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         if (token) {
           setUserToken(token);
           await refresh();
+        } else {
+          const g = await storage.getItem<boolean>(GUEST_KEY, false);
+          if (g) setGuest(true);
         }
       } catch (e) {
         // silent
@@ -157,7 +167,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     } catch {}
     await clearToken();
     setUser(null);
+    setGuest(false);
+    await storage.removeItem(GUEST_KEY);
   }, [clearToken]);
 
-  return <Ctx.Provider value={{ user, loading, signIn, signOut, refresh }}>{children}</Ctx.Provider>;
+  const continueAsGuest = useCallback(async () => {
+    setGuest(true);
+    await storage.setItem(GUEST_KEY, true);
+  }, []);
+
+  const exitGuest = useCallback(async () => {
+    setGuest(false);
+    await storage.removeItem(GUEST_KEY);
+  }, []);
+
+  return <Ctx.Provider value={{ user, loading, guest, signIn, signOut, refresh, continueAsGuest, exitGuest }}>{children}</Ctx.Provider>;
 }

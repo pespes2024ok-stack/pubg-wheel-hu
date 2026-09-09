@@ -22,7 +22,8 @@ Arabic-first (RTL) PUBG / Battle-Royale themed rewards mobile app called "هيب
 - Home lobby (wheel + sparks + gold identity + rarity legend), Store (categories, buy), My Rewards (won/purchased, status, order #), Profile (stats + points history + avatar URL), Referrals (code/share/apply), Notifications (list + read), Content Creators, cosmetic Subscription.
 - Admin: dashboard stats, Prizes CRUD, Products CRUD, Creators CRUD, Backgrounds CRUD (per-screen), Settings (app name, tab labels, backgrounds, signup/referral bonus, spin cooldown), Notifications send/history (push), Users + points adjust, Orders/reward status, change password.
 - Image upload (device + URL) via Object Storage. Animated fire sparks (reanimated). Gold PUBG theme.
-- Backend tested: 35/35 pytest passed. Admin frontend E2E passed.
+- Guest browse mode: users can browse Home/Store/Creators without login; spinning the wheel or buying prompts Google login (public catalog endpoints, auth-gated actions). Rewards/Profile/Referrals/Notifications show a login CTA for guests.
+- Backend tested: 35/35 pytest passed. Admin frontend E2E passed. Guest flow verified.
 
 ## Backlog / next
 - P1: Native build to validate push notifications (needs google-services.json).

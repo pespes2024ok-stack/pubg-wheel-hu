@@ -5,7 +5,9 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 
 import { makeStyles, useTheme, fonts } from "@/src/theme";
 import { api } from "@/src/api";
+import { useAuth } from "@/src/auth";
 import { Icon, ScreenHeader, Loader, EmptyState } from "@/src/components/ui";
+import { GuestLock } from "@/src/components/guest-lock";
 
 export default function Notifications() {
   const styles = useStyles();
@@ -13,8 +15,9 @@ export default function Notifications() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
   const qc = useQueryClient();
+  const { user } = useAuth();
 
-  const notifQ = useQuery({ queryKey: ["notifications"], queryFn: () => api.get("/notifications") });
+  const notifQ = useQuery({ queryKey: ["notifications"], queryFn: () => api.get("/notifications"), enabled: !!user });
 
   const markRead = async (id: string, read: boolean) => {
     if (read) return;
@@ -27,7 +30,9 @@ export default function Notifications() {
   return (
     <View style={[styles.container, { paddingTop: insets.top + 8 }]}>
       <ScreenHeader title="الإشعارات" onBack={() => router.back()} />
-      {notifQ.isLoading ? (
+      {!user ? (
+        <GuestLock title="إشعارات هيبة" subtitle="سجّل الدخول لمتابعة العروض والأخبار والجوائز" icon="bell-outline" />
+      ) : notifQ.isLoading ? (
         <Loader />
       ) : (
         <FlatList

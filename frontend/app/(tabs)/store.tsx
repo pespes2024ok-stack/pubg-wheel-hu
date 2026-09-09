@@ -9,6 +9,7 @@ import { api } from "@/src/api";
 import { useAuth } from "@/src/auth";
 import { GameButton, Icon, Img, RarityBadge, Coin, Loader, EmptyState } from "@/src/components/ui";
 import { useToast } from "@/src/toast";
+import { useLoginGate } from "@/src/login-gate";
 
 export default function Store() {
   const styles = useStyles();
@@ -16,6 +17,7 @@ export default function Store() {
   const insets = useSafeAreaInsets();
   const { user, refresh } = useAuth();
   const toast = useToast();
+  const { promptLogin } = useLoginGate();
   const qc = useQueryClient();
   const [category, setCategory] = useState("الكل");
   const [selected, setSelected] = useState<any>(null);
@@ -34,6 +36,11 @@ export default function Store() {
 
   const buy = async () => {
     if (!selected) return;
+    if (!user) {
+      setSelected(null);
+      promptLogin("سجّل الدخول لإتمام الشراء");
+      return;
+    }
     setBuying(true);
     try {
       await api.post(`/store/buy/${selected.id}`);
@@ -59,9 +66,16 @@ export default function Store() {
             <Text style={styles.storeTitle} numberOfLines={1}>{settings?.store_title || "متجر هيبة"}</Text>
             <Text style={styles.storeSub}>استبدل نقاطك بجوائز PUBG</Text>
           </View>
-          <View style={styles.pointsChip}>
-            <Coin points={user?.points ?? 0} size={16} />
-          </View>
+          {user ? (
+            <View style={styles.pointsChip}>
+              <Coin points={user?.points ?? 0} size={16} />
+            </View>
+          ) : (
+            <Pressable style={styles.loginPill} onPress={() => promptLogin("سجّل الدخول لتجمع النقاط وتشتري")} testID="store-login-pill">
+              <Icon name="login" size={14} color={colors.onBrandPrimary} />
+              <Text style={styles.loginPillText}>دخول</Text>
+            </Pressable>
+          )}
         </View>
         <ScrollView
           horizontal
@@ -131,17 +145,21 @@ export default function Store() {
                     <Text style={styles.priceLabel}>السعر</Text>
                     <Coin points={selected.price_points} size={20} />
                   </View>
-                  <Text style={styles.balanceText}>رصيدك: {user?.points ?? 0} نقطة</Text>
+                  {user ? <Text style={styles.balanceText}>رصيدك: {user?.points ?? 0} نقطة</Text> : <Text style={styles.balanceText}>سجّل الدخول لتشتري بالنقاط</Text>}
                 </View>
-                <GameButton
-                  title={(user?.points ?? 0) >= selected.price_points ? "تأكيد الشراء" : "نقاطك غير كافية"}
-                  icon="cart-check"
-                  loading={buying}
-                  disabled={(user?.points ?? 0) < selected.price_points}
-                  onPress={buy}
-                  testID="confirm-buy"
-                  style={{ alignSelf: "stretch", marginTop: 16 }}
-                />
+                {!user ? (
+                  <GameButton title="سجّل الدخول للشراء" icon="login" onPress={buy} testID="confirm-buy" style={{ alignSelf: "stretch", marginTop: 16 }} />
+                ) : (
+                  <GameButton
+                    title={(user?.points ?? 0) >= selected.price_points ? "تأكيد الشراء" : "نقاطك غير كافية"}
+                    icon="cart-check"
+                    loading={buying}
+                    disabled={(user?.points ?? 0) < selected.price_points}
+                    onPress={buy}
+                    testID="confirm-buy"
+                    style={{ alignSelf: "stretch", marginTop: 16 }}
+                  />
+                )}
                 <Pressable onPress={() => setSelected(null)} style={styles.cancel}>
                   <Text style={styles.cancelText}>إلغاء</Text>
                 </Pressable>
@@ -161,6 +179,8 @@ const useStyles = makeStyles((colors) => ({
   storeTitle: { color: colors.onSurface, fontSize: 18, fontFamily: fonts.displayBold },
   storeSub: { color: colors.muted, fontSize: 12, fontFamily: fonts.textRegular },
   pointsChip: { backgroundColor: colors.surfaceTertiary, borderWidth: 1, borderColor: colors.border, borderRadius: 999, paddingHorizontal: 12, paddingVertical: 7 },
+  loginPill: { flexDirection: "row", alignItems: "center", gap: 5, backgroundColor: colors.brandPrimary, borderRadius: 999, paddingHorizontal: 14, paddingVertical: 8 },
+  loginPillText: { color: colors.onBrandPrimary, fontSize: 13, fontFamily: fonts.textBold },
   chipsScroll: { maxHeight: 56 },
   chipsRow: { gap: 8, paddingHorizontal: 16, alignItems: "center" },
   chip: { height: 36, flexShrink: 0, borderRadius: 999, paddingHorizontal: 16, backgroundColor: colors.surfaceTertiary, borderWidth: 1, borderColor: colors.border, alignItems: "center", justifyContent: "center" },

@@ -18,7 +18,7 @@ export default function Login() {
   const { colors } = useTheme();
   const insets = useSafeAreaInsets();
   const router = useRouter();
-  const { signIn } = useAuth();
+  const { signIn, continueAsGuest } = useAuth();
   const toast = useToast();
   const [busy, setBusy] = useState(false);
 
@@ -68,6 +68,7 @@ export default function Login() {
 
           <View style={styles.actions}>
             <GameButton title="الدخول عبر Google" icon="google" onPress={onGoogle} loading={busy} testID="google-login-button" />
+            <GameButton title="تصفّح كزائر" icon="eye-outline" variant="outline" onPress={async () => { await continueAsGuest(); router.replace("/(tabs)"); }} testID="guest-browse-button" />
             <Pressable style={styles.adminLink} onPress={() => router.push("/admin/login")} testID="admin-login-link">
               <Icon name="shield-crown-outline" size={16} color={colors.muted} />
               <Text style={styles.adminText}>دخول الأدمن</Text>

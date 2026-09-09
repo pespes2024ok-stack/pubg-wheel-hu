@@ -9,6 +9,7 @@ import { makeStyles, useTheme, fonts } from "@/src/theme";
 import { api } from "@/src/api";
 import { useAuth } from "@/src/auth";
 import { GameButton, Icon, ScreenHeader } from "@/src/components/ui";
+import { GuestLock } from "@/src/components/guest-lock";
 import { useToast } from "@/src/toast";
 
 export default function Referrals() {
@@ -48,7 +49,10 @@ export default function Referrals() {
   return (
     <View style={[styles.container, { paddingTop: insets.top + 8 }]}>
       <ScreenHeader title="ادعُ أصدقاءك" onBack={() => router.back()} />
-      <ScrollView contentContainerStyle={{ padding: 16, paddingBottom: insets.bottom + 24, gap: 16 }} showsVerticalScrollIndicator={false}>
+      {!user ? (
+        <GuestLock title="ادعُ أصدقاءك واربح" subtitle="سجّل الدخول للحصول على رمز الإحالة الخاص بك وكسب النقاط" icon="account-multiple-plus-outline" />
+      ) : (
+        <ScrollView contentContainerStyle={{ padding: 16, paddingBottom: insets.bottom + 24, gap: 16 }} showsVerticalScrollIndicator={false}>
         <LinearGradient colors={["#FDD84E", colors.brandPrimary, "#D99400"]} style={styles.hero}>
           <Icon name="account-multiple-plus" size={40} color={colors.onBrandPrimary} />
           <Text style={styles.heroTitle}>اربح {bonus} نقطة</Text>
@@ -90,6 +94,7 @@ export default function Referrals() {
           </View>
         )}
       </ScrollView>
+      )}
     </View>
   );
 }

@@ -5,7 +5,9 @@ import { useQuery } from "@tanstack/react-query";
 
 import { makeStyles, useTheme, fonts, rarityColor } from "@/src/theme";
 import { api } from "@/src/api";
+import { useAuth } from "@/src/auth";
 import { Icon, Img, RarityBadge, Loader, EmptyState } from "@/src/components/ui";
+import { GuestLock } from "@/src/components/guest-lock";
 
 const STATUS_LABEL: Record<string, string> = { pending: "قيد المعالجة", delivered: "تم التسليم", cancelled: "ملغاة" };
 
@@ -14,9 +16,12 @@ export default function Rewards() {
   const { colors } = useTheme();
   const insets = useSafeAreaInsets();
   const [tab, setTab] = useState<"all" | "wheel" | "store">("all");
+  const { user } = useAuth();
 
-  const rewardsQ = useQuery({ queryKey: ["rewards"], queryFn: () => api.get("/rewards") });
+  const rewardsQ = useQuery({ queryKey: ["rewards"], queryFn: () => api.get("/rewards"), enabled: !!user });
   const rewards = (rewardsQ.data || []).filter((r: any) => tab === "all" || r.source === tab);
+
+  if (!user) return <GuestLock title="جوائزي تنتظرك" subtitle="سجّل الدخول لتربح جوائز PUBG وتتابع مقتنياتك وطلباتك" icon="treasure-chest-outline" />;
 
   return (
     <View style={styles.container}>

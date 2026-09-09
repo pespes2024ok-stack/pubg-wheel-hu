@@ -16,6 +16,7 @@ import { queryClient } from "@/src/query-client";
 import { AuthProvider, useAuth } from "@/src/auth";
 import { AdminProvider } from "@/src/admin";
 import { ToastProvider } from "@/src/toast";
+import { LoginGateProvider } from "@/src/login-gate";
 import { useTheme } from "@/src/theme";
 
 LogBox.ignoreAllLogs(true);
@@ -47,7 +48,7 @@ if (Platform.OS === "android") {
 }
 
 function AuthGate() {
-  const { user, loading } = useAuth();
+  const { user, loading, guest } = useAuth();
   const segments = useSegments();
   const router = useRouter();
   const { colors } = useTheme();
@@ -56,9 +57,9 @@ function AuthGate() {
     if (loading) return;
     const root = segments[0];
     if (root === "admin") return; // admin has its own token gate
-    if (!user && root !== "login") router.replace("/login");
+    if (!user && !guest && root !== "login") router.replace("/login");
     else if (user && root === "login") router.replace("/(tabs)");
-  }, [user, loading, segments]);
+  }, [user, loading, guest, segments]);
 
   if (loading) {
     return (
@@ -118,8 +119,10 @@ export default function RootLayout() {
             <ToastProvider>
               <AdminProvider>
                 <AuthProvider>
-                  <StatusBar style="light" />
-                  <AuthGate />
+                  <LoginGateProvider>
+                    <StatusBar style="light" />
+                    <AuthGate />
+                  </LoginGateProvider>
                 </AuthProvider>
               </AdminProvider>
             </ToastProvider>

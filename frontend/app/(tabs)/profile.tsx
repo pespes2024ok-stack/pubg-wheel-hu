@@ -8,6 +8,7 @@ import { makeStyles, useTheme, fonts } from "@/src/theme";
 import { api } from "@/src/api";
 import { useAuth } from "@/src/auth";
 import { GameButton, Icon, Img, Loader } from "@/src/components/ui";
+import { GuestLock } from "@/src/components/guest-lock";
 import { useBackgrounds, pickBackground } from "@/src/hooks";
 import { useToast } from "@/src/toast";
 
@@ -32,7 +33,7 @@ export default function Profile() {
   const { data: settings } = useQuery({ queryKey: ["settings"], queryFn: () => api.get("/settings") });
   const bgs = useBackgrounds();
   const profileBg = pickBackground(bgs.data, "profile", settings?.profile_background);
-  const txQ = useQuery({ queryKey: ["transactions"], queryFn: () => api.get("/transactions") });
+  const txQ = useQuery({ queryKey: ["transactions"], queryFn: () => api.get("/transactions"), enabled: !!user });
 
   const saveAvatar = async () => {
     if (!avatarUrl.trim()) return;
@@ -47,7 +48,7 @@ export default function Profile() {
     }
   };
 
-  if (!user) return <Loader />;
+  if (!user) return <GuestLock title="ملف اللاعب" subtitle="سجّل الدخول لعرض نقاطك وإحالاتك وجوائزك وسجل عملياتك" icon="account-circle-outline" />;
 
   return (
     <View style={styles.container}>

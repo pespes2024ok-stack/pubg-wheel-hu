@@ -404,7 +404,7 @@ async def get_settings():
 # Wheel
 # ---------------------------------------------------------------------------
 @api.get("/wheel/prizes")
-async def wheel_prizes(user: dict = Depends(get_current_user)):
+async def wheel_prizes():
     prizes = await db.prizes.find({"active": True, "deleted_at": None}, {"_id": 0}).sort([("order", 1), ("id", 1)]).to_list(100)
     return prizes
 
@@ -495,7 +495,7 @@ async def wheel_spin(user: dict = Depends(get_current_user)):
 # Store
 # ---------------------------------------------------------------------------
 @api.get("/store/products")
-async def store_products(user: dict = Depends(get_current_user)):
+async def store_products():
     products = await db.products.find({"active": True, "deleted_at": None}, {"_id": 0}).sort("order", 1).to_list(200)
     return products
 
@@ -585,7 +585,7 @@ async def read_notification(note_id: str, user: dict = Depends(get_current_user)
 # Content creators
 # ---------------------------------------------------------------------------
 @api.get("/creators")
-async def get_creators(user: dict = Depends(get_current_user)):
+async def get_creators():
     creators = await db.creators.find({"active": True, "deleted_at": None}, {"_id": 0}).sort("order", 1).to_list(100)
     return creators
 
