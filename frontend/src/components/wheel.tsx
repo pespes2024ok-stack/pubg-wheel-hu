@@ -40,7 +40,7 @@ const LuckyWheel = forwardRef<
   const cx = size / 2;
   const cy = size / 2;
   const r = size / 2;
-  const MED = Math.round(size * 0.19);
+  const MED = Math.round(size * 0.21);
   const CENTER = Math.round(size * 0.29);
 
   const finish = (index: number) => {
@@ -110,46 +110,39 @@ const LuckyWheel = forwardRef<
           <Circle cx={cx} cy={cy} r={r - 10} fill="none" stroke={GOLD_SOFT + "66"} strokeWidth={1.5} />
         </Svg>
 
-        {/* Prize medallions + labels (rotate with wheel) */}
+        {/* Prize medallions with centered name (rotate with wheel) */}
         {prizes.map((p, i) => {
           const mid = i * seg + seg / 2;
-          const mp = polar(cx, cy, r * 0.6, mid);
-          const lp = polar(cx, cy, r * 0.4, mid);
+          const mp = polar(cx, cy, r * 0.62, mid);
           const src = resolveImage(p.image);
           const label = p.kind === "nothing" ? "حظ أوفر" : p.name;
-          const short = label.length > 12 ? label.slice(0, 12) : label;
           return (
-            <React.Fragment key={`med-${p.id}`}>
-              <View
-                style={{
-                  position: "absolute",
-                  left: mp.x - MED / 2,
-                  top: mp.y - MED / 2,
-                  width: MED,
-                  height: MED,
-                  borderRadius: MED / 2,
-                  borderWidth: 2,
-                  borderColor: GOLD,
-                  overflow: "hidden",
-                  backgroundColor: "#0F0A04",
-                  alignItems: "center",
-                  justifyContent: "center",
-                }}
+            <View
+              key={`med-${p.id}`}
+              style={{
+                position: "absolute",
+                left: mp.x - MED / 2,
+                top: mp.y - MED / 2,
+                width: MED,
+                height: MED,
+                borderRadius: MED / 2,
+                borderWidth: 2,
+                borderColor: GOLD,
+                overflow: "hidden",
+                backgroundColor: "#0F0A04",
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+            >
+              {src ? <Image source={{ uri: src }} style={{ position: "absolute", width: "100%", height: "100%" }} contentFit="cover" /> : null}
+              {src ? <View style={{ position: "absolute", width: "100%", height: "100%", backgroundColor: "rgba(0,0,0,0.55)" }} /> : null}
+              <Text
+                numberOfLines={2}
+                style={{ color: "#FFFFFF", fontSize: 11, lineHeight: 14, fontFamily: fonts.textBold, textAlign: "center", paddingHorizontal: 4, textShadowColor: "#000", textShadowRadius: 4 }}
               >
-                {src ? (
-                  <Image source={{ uri: src }} style={{ width: "100%", height: "100%" }} contentFit="cover" />
-                ) : (
-                  <Text style={{ color: GOLD, fontSize: 11, fontFamily: fonts.displayBold, textAlign: "center", paddingHorizontal: 2 }}>
-                    {p.value && p.value !== "-" ? p.value : short}
-                  </Text>
-                )}
-              </View>
-              <View style={{ position: "absolute", left: lp.x - size * 0.16, top: lp.y - 10, width: size * 0.32, alignItems: "center" }}>
-                <Text numberOfLines={1} style={{ color: "#FFFFFF", fontSize: 12, fontFamily: fonts.textBold, textShadowColor: "#000", textShadowRadius: 4 }}>
-                  {short}
-                </Text>
-              </View>
-            </React.Fragment>
+                {label}
+              </Text>
+            </View>
           );
         })}
       </Animated.View>
