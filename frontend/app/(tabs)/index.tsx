@@ -100,6 +100,12 @@ export default function Home() {
     }
   };
 
+  const tapSpin = () => {
+    if (!user) return promptLogin("سجّل الدخول لتدوير عجلة الحظ");
+    if (!canSpin) return toast.show("لقد استخدمت دورتك اليوم، عد غداً!", "info");
+    onSpin();
+  };
+
   if (prizesQ.isLoading) return <Loader />;
 
   return (
@@ -152,8 +158,10 @@ export default function Home() {
             {/* Wheel */}
             <View style={styles.wheelWrap}>
               <View style={[styles.glow, { width: WHEEL_SIZE + 40, height: WHEEL_SIZE + 40, borderRadius: (WHEEL_SIZE + 40) / 2 }]} />
-              <LuckyWheel ref={wheelRef} prizes={prizesQ.data || []} size={WHEEL_SIZE} />
+              <LuckyWheel ref={wheelRef} prizes={prizesQ.data || []} size={WHEEL_SIZE} onCenterPress={tapSpin} spinning={spinning} />
             </View>
+
+            {user && canSpin ? <Text style={styles.dailyReady}>دورانك اليومي متاح الآن 🔥</Text> : null}
 
             {/* Spin CTA */}
             {!user ? (
@@ -168,17 +176,19 @@ export default function Home() {
               </View>
             )}
 
-            {/* Rarity legend */}
-            <View style={styles.legend}>
-              {[
-                { k: "common", label: "عادية" },
-                { k: "rare", label: "نادرة" },
-                { k: "epic", label: "ملحمية" },
-                { k: "legendary", label: "أسطورية" },
-              ].map((r) => (
-                <View key={r.k} style={styles.legendItem}>
-                  <View style={[styles.legendDot, { backgroundColor: rarityColor(r.k, colors) }]} />
-                  <Text style={styles.legendText}>{r.label}</Text>
+            {/* Wheel prizes list */}
+            <View style={styles.prizesBox}>
+              <View style={styles.prizesHead}>
+                <View style={styles.accentBar} />
+                <Text style={styles.prizesTitle}>جوائز العجلة</Text>
+              </View>
+              {(prizesQ.data || []).map((p: any) => (
+                <View key={`pl-${p.id}`} style={styles.prizeRow}>
+                  <View style={styles.prizeMed}>
+                    <Img uri={p.image} style={{ width: "100%", height: "100%" }} fallbackIcon={p.kind === "points" ? "hexagon-multiple" : p.kind === "nothing" ? "emoticon-sad" : "gift"} />
+                  </View>
+                  <Text style={styles.prizeName} numberOfLines={1}>{p.kind === "nothing" ? "حظ أوفر" : p.name}</Text>
+                  <RarityBadge rarity={p.rarity} size="sm" />
                 </View>
               ))}
             </View>
@@ -275,6 +285,14 @@ const useStyles = makeStyles((colors) => ({
   legendItem: { flexDirection: "row", alignItems: "center", gap: 5 },
   legendDot: { width: 9, height: 9, borderRadius: 5 },
   legendText: { color: colors.onSurfaceSecondary, fontSize: 12, fontFamily: fonts.textSemiBold },
+  dailyReady: { color: colors.brandSecondary, fontSize: 15, fontFamily: fonts.textBold, textAlign: "center", marginTop: 12 },
+  prizesBox: { backgroundColor: colors.surfaceSecondary, borderWidth: 1, borderColor: colors.border, borderRadius: 16, padding: 14, marginTop: 18 },
+  prizesHead: { flexDirection: "row", alignItems: "center", gap: 8, marginBottom: 10 },
+  accentBar: { width: 4, height: 18, borderRadius: 2, backgroundColor: colors.brandPrimary },
+  prizesTitle: { color: colors.onSurface, fontSize: 17, fontFamily: fonts.textBold },
+  prizeRow: { flexDirection: "row", alignItems: "center", gap: 12, paddingVertical: 8, borderTopWidth: 1, borderTopColor: colors.divider },
+  prizeMed: { width: 42, height: 42, borderRadius: 21, borderWidth: 1.5, borderColor: colors.brandSecondary, overflow: "hidden", backgroundColor: colors.surfaceTertiary },
+  prizeName: { flex: 1, color: colors.onSurface, fontSize: 14, fontFamily: fonts.textSemiBold },
   grid: { flexDirection: "row", flexWrap: "wrap", gap: 12, marginTop: 20 },
   gridCard: { flexBasis: "47.5%", flexGrow: 1, backgroundColor: colors.surfaceSecondary, borderWidth: 1, borderColor: colors.border, borderRadius: 16, padding: 16, gap: 6 },
   gridIcon: { width: 48, height: 48, borderRadius: 14, borderWidth: 1, alignItems: "center", justifyContent: "center", marginBottom: 4 },
