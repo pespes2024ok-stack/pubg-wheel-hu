@@ -207,6 +207,7 @@ export default function Home() {
       {/* Result modal */}
       <Modal visible={!!result} transparent animationType="fade" onRequestClose={() => setResult(null)}>
         <View style={styles.modalBg}>
+          {result?.won && (result.prize?.rarity === "legendary" || result.prize?.rarity === "epic") ? <Sparks count={28} /> : null}
           {result ? (
             <View style={[styles.resultCard, result.won && { borderColor: rarityColor(result.prize?.rarity, colors) }]} testID="spin-result">
               {result.won ? (
